@@ -1,0 +1,65 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getAgenda, postAnmeldung, formatDatum } from '../../lib/api';
+
+const { id } = Astro.params;
+const agenda = (await getAgenda()) ?? [];
+const anlass = agenda.find((a) => a.id === Number(id) && !a.istkegeln);
+
+let result: { ok: boolean; message: string } | null = null;
+
+if (Astro.request.method === 'POST' && anlass) {
+  const form = await Astro.request.formData();
+  result = await postAnmeldung({
+    anlassid: anlass.id,
+    name: String(form.get('name') ?? ''),
+    vorname: String(form.get('vorname') ?? ''),
+    email: String(form.get('email') ?? ''),
+    bemerkung: String(form.get('bemerkung') ?? '') || undefined,
+    website: String(form.get('website') ?? '') || undefined,
+  });
+}
+---
+
+<Layout title="Anmeldung">
+  {!anlass && (
+    <>
+      <h1>Anlass nicht gefunden</h1>
+      <p class="hinweis">Dieser Anlass existiert nicht, liegt in der Vergangenheit oder benötigt keine Anmeldung.</p>
+      <a class="btn" href="/agenda">Zur Agenda</a>
+    </>
+  )}
+  {anlass && (
+    <>
+      <h1>Anmeldung: {anlass.name}</h1>
+      <p class="datum">{formatDatum(anlass.datum)}</p>
+      {anlass.beschreibung && <p>{anlass.beschreibung}</p>}
+
+      {result && <div class:list={['alert', result.ok ? 'ok' : 'error']}>{result.message}</div>}
+
+      {!result?.ok && (
+        <form method="POST" class="card">
+          <label for="vorname">Vorname *</label>
+          <input id="vorname" name="vorname" required maxlength="100" />
+
+          <label for="name">Nachname *</label>
+          <input id="name" name="name" required maxlength="100" />
+
+          <label for="email">E-Mail *</label>
+          <input id="email" name="email" type="email" required maxlength="255" />
+
+          <label for="bemerkung">Bemerkung</label>
+          <textarea id="bemerkung" name="bemerkung" rows="3" maxlength="500"></textarea>
+
+          <div class="honeypot" aria-hidden="true">
+            <label for="website">Website</label>
+            <input id="website" name="website" tabindex="-1" autocomplete="off" />
+          </div>
+
+          <p><button class="btn" type="submit">Anmelden</button></p>
+        </form>
+      )}
+      {result?.ok && <a class="btn" href="/agenda">Zur Agenda</a>}
+    </>
+  )}
+</Layout>

@@ -1,0 +1,77 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getJahre, getClubmeister, getKegelmeister } from '../lib/api';
+
+const jahre = (await getJahre()) ?? [];
+const selected = Astro.url.searchParams.get('jahr') ?? jahre[0]?.jahr ?? null;
+const freigabe = jahre.find((j) => j.jahr === selected);
+
+const clubmeister = freigabe?.clubmeister && selected ? ((await getClubmeister(selected)) ?? []) : [];
+const kegelmeister = freigabe?.kegelmeister && selected ? ((await getKegelmeister(selected)) ?? []) : [];
+---
+
+<Layout title="Meisterschaft">
+  <h1>Club- und Kegelmeisterschaft</h1>
+
+  {jahre.length === 0 && <p class="hinweis">Zurzeit sind keine Jahre freigegeben.</p>}
+
+  {jahre.length > 0 && (
+    <form method="GET" class="card">
+      <label for="jahr">Jahr</label>
+      <select id="jahr" name="jahr" onchange="this.form.submit()">
+        {jahre.map((j) => (
+          <option value={j.jahr} selected={j.jahr === selected}>{j.jahr}</option>
+        ))}
+      </select>
+    </form>
+  )}
+
+  {clubmeister.length > 0 && (
+    <section>
+      <h2>Clubmeisterschaft {selected}</h2>
+      <table>
+        <thead>
+          <tr><th>Rang</th><th>Name</th><th>Punkte</th></tr>
+        </thead>
+        <tbody>
+          {clubmeister.map((m) => (
+            <tr>
+              <td>{m.rang}</td>
+              <td>{m.vorname} {m.nachname}</td>
+              <td>{m.punkte}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  )}
+
+  {kegelmeister.length > 0 && (
+    <section>
+      <h2>Kegelmeisterschaft {selected}</h2>
+      <table>
+        <thead>
+          <tr><th>Rang</th><th>Name</th><th>Punkte</th></tr>
+        </thead>
+        <tbody>
+          {kegelmeister.map((m) => (
+            <tr>
+              <td>{m.rang}</td>
+              <td>{m.vorname} {m.nachname}</td>
+              <td>{m.punkte}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  )}
+</Layout>
+
+<style>
+  select {
+    padding: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 1rem;
+  }
+</style>

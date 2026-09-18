@@ -1,0 +1,19 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getBerichte, formatDatum } from '../lib/api';
+
+const berichte = (await getBerichte()) ?? [];
+---
+
+<Layout title="Berichte">
+  <h1>Berichte</h1>
+  {berichte.length === 0 && <p class="hinweis">Zurzeit keine Berichte.</p>}
+  {berichte.map((b) => (
+    <article class="card">
+      <h2>{b.titel}</h2>
+      <div class="datum">{formatDatum(b.datum)}</div>
+      <div set:html={b.text} />
+      {b.datei && <a class="btn" href={b.datei} target="_blank" rel="noopener">Download</a>}
+    </article>
+  ))}
+</Layout>

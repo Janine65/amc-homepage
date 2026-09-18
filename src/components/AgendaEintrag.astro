@@ -1,0 +1,54 @@
+---
+import type { AgendaItem } from '../lib/api';
+import { wannText, mapsLink } from '../lib/api';
+
+interface Props {
+  anlass: AgendaItem;
+  showAnmeldung?: boolean;
+}
+const { anlass, showAnmeldung = true } = Astro.props;
+---
+
+<article class="card">
+  <h2>{anlass.name}</h2>
+  <dl class="details">
+    <dt>Wann</dt>
+    <dd>{wannText(anlass)}</dd>
+    {anlass.ort && (
+      <>
+        <dt>Wo</dt>
+        <dd>
+          {anlass.ort}
+          <a href={mapsLink(anlass.ort)} target="_blank" rel="noopener" title="Auf Google Maps anzeigen">🗺️ Karte</a>
+        </dd>
+      </>
+    )}
+    {anlass.beschreibung && (
+      <>
+        <dt>Was</dt>
+        <dd set:html={anlass.beschreibung.replace(/\n/g, '<br />')} />
+      </>
+    )}
+  </dl>
+  {showAnmeldung && !anlass.istkegeln && <a class="btn" href={`/anmeldung/${anlass.id}`}>Anmelden</a>}
+</article>
+
+<style>
+  .details {
+    display: grid;
+    grid-template-columns: 5rem 1fr;
+    gap: 0.25rem 1rem;
+    margin: 0.5rem 0 1rem;
+  }
+  .details dt {
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .details dd {
+    margin: 0;
+  }
+  .details dd a {
+    margin-left: 0.5rem;
+    white-space: nowrap;
+  }
+</style>

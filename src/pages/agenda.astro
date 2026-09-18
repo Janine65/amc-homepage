@@ -1,0 +1,13 @@
+---
+import Layout from '../layouts/Layout.astro';
+import AgendaEintrag from '../components/AgendaEintrag.astro';
+import { getAgenda } from '../lib/api';
+
+const agenda = (await getAgenda()) ?? [];
+---
+
+<Layout title="Agenda">
+  <h1>Agenda</h1>
+  {agenda.length === 0 && <p class="hinweis">Zurzeit keine anstehenden Veranstaltungen.</p>}
+  {agenda.map((a) => <AgendaEintrag anlass={a} />)}
+</Layout>
