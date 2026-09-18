@@ -1,4 +1,6 @@
 ---
+import pkg from '../../package.json';
+
 interface Props {
   title?: string;
 }
@@ -38,7 +40,7 @@ const current = Astro.url.pathname;
       <slot />
     </main>
     <footer>
-      <div class="container">© {new Date().getFullYear()} Auto-Moto-Club Swissair</div>
+      <div class="container">© {new Date().getFullYear()} Auto-Moto-Club Swissair · v{pkg.version}</div>
     </footer>
   </body>
 </html>
