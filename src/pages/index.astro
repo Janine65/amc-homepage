@@ -3,24 +3,30 @@ import Layout from '../layouts/Layout.astro';
 import AgendaEintrag from '../components/AgendaEintrag.astro';
 import { getNews, getAgenda, formatDatum } from '../lib/api';
 
-const news = (await getNews()) ?? [];
+const news = ((await getNews()) ?? []).slice(0, 3);
 const agenda = ((await getAgenda()) ?? []).slice(0, 3);
 ---
 
 <Layout title="News">
-  <h1>News</h1>
+  <h1>Die neuesten News</h1>
   {news.length === 0 && <p class="hinweis">Zurzeit keine News.</p>}
-  {news.map((n) => (
-    <article class="card">
-      <h2>{n.titel}</h2>
-      <div class="datum">{formatDatum(n.datum)}</div>
-      <div set:html={n.text} />
-    </article>
-  ))}
+  {news.length > 0 && (
+    <section>
+      {news.map((n) => (
+        <article class="card">
+          <h2>{n.titel}</h2>
+          <div class="datum">{formatDatum(n.datum)}</div>
+          <div set:html={n.text} />
+        </article>
+      ))}
+      <p><a href="/news">Alle News ansehen →</a></p>
+    </section>
+  )}
+
 
   {agenda.length > 0 && (
     <section>
-      <h1>Nächste Veranstaltungen</h1>
+      <h1>Die nächsten Veranstaltungen</h1>
       {agenda.map((a) => <AgendaEintrag anlass={a} />)}
       <p><a href="/agenda">Alle Veranstaltungen ansehen →</a></p>
     </section>
