@@ -62,8 +62,19 @@ async function getJson<T>(path: string): Promise<T | null> {
   }
 }
 
-export const getNews = () => getJson<NewsItem[]>('/public/news');
-export const getBerichte = () => getJson<BerichtItem[]>('/public/berichte');
+/** Ersetzt geschützte Leerzeichen aus dem Rich-Text-Editor, damit Texte umbrechen können. */
+function normalizeHtml(html: string): string {
+  return html.replace(/&nbsp;|\u00a0/g, ' ');
+}
+
+export const getNews = () =>
+  getJson<NewsItem[]>('/public/news').then(
+    (items) => items?.map((n) => ({ ...n, text: normalizeHtml(n.text) })) ?? null,
+  );
+export const getBerichte = () =>
+  getJson<BerichtItem[]>('/public/berichte').then(
+    (items) => items?.map((b) => ({ ...b, text: normalizeHtml(b.text) })) ?? null,
+  );
 export const getAgenda = () => getJson<AgendaItem[]>('/public/agenda');
 export const getJahre = () => getJson<JahrFreigabe[]>('/public/jahre');
 export const getClubmeister = (jahr: string) =>
