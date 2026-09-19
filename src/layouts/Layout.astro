@@ -52,7 +52,7 @@ const current = Astro.url.pathname;
     --muted: #6b7280;
     --bg: #f8fafc;
     --card: #ffffff;
-    --border: #e5e7eb;
+    --border: #e51818;
   }
   * { box-sizing: border-box; }
   body {
@@ -94,10 +94,10 @@ const current = Astro.url.pathname;
   nav a.active, nav a:hover { color: var(--primary); border-bottom: 2px solid var(--primary); }
   main { padding: 2rem 1rem; min-height: 60vh; }
   footer { border-top: 1px solid var(--border); padding: 1rem 0; color: var(--muted); font-size: 0.9rem; }
-  h1 { margin-top: 0; }
+  h1 { margin-top: 0; color: var(--primary)}
   .card {
     background: var(--card);
-    border: 1px solid var(--border);
+    color: var(--text);
     border-radius: 8px;
     padding: 1.25rem;
     margin-bottom: 1rem;
