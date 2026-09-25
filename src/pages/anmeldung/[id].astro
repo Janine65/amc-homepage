@@ -4,7 +4,7 @@ import { getAgenda, postAnmeldung, formatDatum } from '../../lib/api';
 
 const { id } = Astro.params;
 const agenda = (await getAgenda()) ?? [];
-const anlass = agenda.find((a) => a.id === Number(id) && !a.istkegeln);
+const anlass = agenda.find((a) => a.id === Number(id) && !a.istkegeln && !a.istmotorrad);
 
 let result: { ok: boolean; message: string } | null = null;
 

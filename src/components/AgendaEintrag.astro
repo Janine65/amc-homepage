@@ -30,7 +30,7 @@ const { anlass, showAnmeldung = true } = Astro.props;
       </>
     )}
   </dl>
-  {showAnmeldung && !anlass.istkegeln && <a class="btn" href={`/anmeldung/${anlass.id}`}>Anmelden</a>}
+  {showAnmeldung && !anlass.istkegeln && !anlass.istmotorrad && <a class="btn" href={`/anmeldung/${anlass.id}`}>Anmelden</a>}
 </article>
 
 <style>

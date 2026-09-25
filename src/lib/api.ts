@@ -31,6 +31,7 @@ export interface AgendaItem {
   name: string;
   beschreibung: string | null;
   istkegeln: boolean;
+  istmotorrad: boolean;
   zeit_von: string | null;
   zeit_bis: string | null;
   ort: string | null;
