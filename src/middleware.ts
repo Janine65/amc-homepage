@@ -1,8 +1,8 @@
 import { defineMiddleware } from 'astro:middleware';
 import { countBesucher, getBesucher } from './lib/api';
 
-/** Crawler/Bots (Applebot, PetalBot, Googlebot, …) nicht als Besucher zählen. */
-const BOT_RE = /bot|crawl|spider|slurp|bingpreview|facebookexternalhit|whatsapp|telegram|preview/i;
+/** Crawler/Bots und der Docker-Healthcheck (UA "healthcheck"/"node") nicht als Besucher zählen. */
+const BOT_RE = /bot|crawl|spider|slurp|bingpreview|facebookexternalhit|whatsapp|telegram|preview|healthcheck|^node$|^$/i;
 
 /** Zählt Besucher einmal pro Browser-Session; Cookies müssen vor dem Rendern gesetzt werden. */
 export const onRequest = defineMiddleware(async (context, next) => {
