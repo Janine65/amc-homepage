@@ -5,12 +5,17 @@ interface Props {
   title?: string;
 }
 const { title = 'AMC Swissair' } = Astro.props;
+
+// Wird in der Middleware gezählt (Cookies können hier nicht mehr gesetzt werden)
+const besucher = Astro.locals.besucher;
+
 const nav = [
   { href: '/', label: 'Übersicht' },
   { href: '/news', label: 'News' },
   { href: '/berichte', label: 'Berichte' },
   { href: '/agenda', label: 'Agenda' },
   { href: '/meisterschaft', label: 'Meisterschaft' },
+  { href: '/kontakt', label: 'Kontakt' },
 ];
 const current = Astro.url.pathname;
 ---
@@ -35,13 +40,17 @@ const current = Astro.url.pathname;
             <a href={item.href} class:list={{ active: current === item.href }}>{item.label}</a>
           ))}
         </nav>
+        <a href="https://www.facebook.com/amcswissair" target="_blank" rel="noopener noreferrer"><img src="/facebook.png" alt="Facebook" class="social-icon" width="30px"/></a>
       </div>
     </header>
     <main class="container">
       <slot />
     </main>
     <footer>
-      <div class="container">© {new Date().getFullYear()} Auto-Moto-Club Swissair · v{pkg.version}</div>
+      <div class="container">
+        © {new Date().getFullYear()} Auto-Moto-Club Swissair · v{pkg.version}
+        {besucher !== null && <span class="besucher"> · {besucher.toLocaleString('de-CH')} Besucher</span>}
+      </div>
     </footer>
   </body>
 </html>

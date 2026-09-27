@@ -1,0 +1,61 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCaptcha, postKontakt } from '../lib/api';
+
+let result: { ok: boolean; message: string } | null = null;
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  result = await postKontakt({
+    name: String(form.get('name') ?? ''),
+    vorname: String(form.get('vorname') ?? ''),
+    email: String(form.get('email') ?? ''),
+    betreff: String(form.get('betreff') ?? ''),
+    nachricht: String(form.get('nachricht') ?? ''),
+    website: String(form.get('website') ?? '') || undefined,
+    captcha: String(form.get('captcha') ?? ''),
+    captcha_token: String(form.get('captcha_token') ?? ''),
+  });
+}
+
+// Neue Rechenaufgabe für jede (erneute) Anzeige des Formulars
+const captcha = result?.ok ? null : await getCaptcha();
+---
+
+<Layout title="Kontakt">
+  <h1>Kontakt</h1>
+  <p>Hast du Fragen zum Club oder zu unseren Anlässen? Schreibe uns – wir melden uns gerne bei dir.</p>
+
+  {result && <div class:list={['alert', result.ok ? 'ok' : 'error']}>{result.message}</div>}
+
+  {!result?.ok && (
+    <form method="POST" class="card">
+      <label for="vorname">Vorname *</label>
+      <input id="vorname" name="vorname" required maxlength="100" />
+
+      <label for="name">Nachname *</label>
+      <input id="name" name="name" required maxlength="100" />
+
+      <label for="email">E-Mail *</label>
+      <input id="email" name="email" type="email" required maxlength="255" />
+
+      <label for="betreff">Betreff *</label>
+      <input id="betreff" name="betreff" required maxlength="200" />
+
+      <label for="nachricht">Nachricht *</label>
+      <textarea id="nachricht" name="nachricht" rows="6" required maxlength="5000"></textarea>
+
+      <label for="captcha">Sicherheitsfrage: Was ist {captcha?.frage}? *</label>
+      <input id="captcha" name="captcha" required inputmode="numeric" maxlength="3" autocomplete="off" />
+      <input type="hidden" name="captcha_token" value={captcha?.token} />
+
+      <div class="honeypot" aria-hidden="true">
+        <label for="website">Website</label>
+        <input id="website" name="website" tabindex="-1" autocomplete="off" />
+      </div>
+
+      <p><button class="btn" type="submit">Senden</button></p>
+    </form>
+  )}
+  {result?.ok && <a class="btn" href="/">Zur Übersicht</a>}
+</Layout>

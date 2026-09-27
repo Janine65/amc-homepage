@@ -78,6 +78,30 @@ export const getBerichte = () =>
   );
 export const getAgenda = () => getJson<AgendaItem[]>('/public/agenda');
 export const getJahre = () => getJson<JahrFreigabe[]>('/public/jahre');
+
+/** Aktueller Besucherstand (ohne zu zählen). */
+export const getBesucher = () => getJson<number>('/public/besucher');
+
+export interface Captcha {
+  frage: string;
+  token: string;
+}
+
+/** Rechenaufgabe für die öffentlichen Formulare. */
+export const getCaptcha = () => getJson<Captcha>('/public/captcha');
+
+/** Zählt einen neuen Besucher und liefert den neuen Stand. */
+export async function countBesucher(): Promise<number | null> {
+  try {
+    const res = await fetch(`${API_URL}/public/besucher`, { method: 'POST' });
+    if (!res.ok) return null;
+    const body = (await res.json()) as RetData<number>;
+    return body.data;
+  } catch (err) {
+    console.error('API-Fehler bei /public/besucher:', err);
+    return null;
+  }
+}
 export const getClubmeister = (jahr: string) =>
   getJson<MeisterItem[]>(`/public/clubmeister?jahr=${encodeURIComponent(jahr)}`);
 export const getKegelmeister = (jahr: string) =>
@@ -90,6 +114,8 @@ export async function postAnmeldung(payload: {
   email: string;
   bemerkung?: string;
   website?: string;
+  captcha?: string;
+  captcha_token?: string;
 }): Promise<{ ok: boolean; message: string }> {
   try {
     const res = await fetch(`${API_URL}/public/anmeldung`, {
@@ -100,6 +126,30 @@ export async function postAnmeldung(payload: {
     if (res.ok) return { ok: true, message: 'Anmeldung erhalten – vielen Dank!' };
     const body = await res.json().catch(() => null);
     return { ok: false, message: body?.detail ?? 'Anmeldung fehlgeschlagen.' };
+  } catch {
+    return { ok: false, message: 'Server nicht erreichbar. Bitte später erneut versuchen.' };
+  }
+}
+
+export async function postKontakt(payload: {
+  name: string;
+  vorname: string;
+  email: string;
+  betreff: string;
+  nachricht: string;
+  website?: string;
+  captcha?: string;
+  captcha_token?: string;
+}): Promise<{ ok: boolean; message: string }> {
+  try {
+    const res = await fetch(`${API_URL}/public/kontakt`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (res.ok) return { ok: true, message: 'Nachricht erhalten – vielen Dank!' };
+    const body = await res.json().catch(() => null);
+    return { ok: false, message: body?.detail ?? 'Senden fehlgeschlagen. Bitte Eingaben prüfen.' };
   } catch {
     return { ok: false, message: 'Server nicht erreichbar. Bitte später erneut versuchen.' };
   }

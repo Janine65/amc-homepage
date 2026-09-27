@@ -1,6 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { getAgenda, postAnmeldung, formatDatum } from '../../lib/api';
+import { getAgenda, getCaptcha, postAnmeldung, formatDatum } from '../../lib/api';
 
 const { id } = Astro.params;
 const agenda = (await getAgenda()) ?? [];
@@ -17,8 +17,13 @@ if (Astro.request.method === 'POST' && anlass) {
     email: String(form.get('email') ?? ''),
     bemerkung: String(form.get('bemerkung') ?? '') || undefined,
     website: String(form.get('website') ?? '') || undefined,
+    captcha: String(form.get('captcha') ?? ''),
+    captcha_token: String(form.get('captcha_token') ?? ''),
   });
 }
+
+// Neue Rechenaufgabe für jede (erneute) Anzeige des Formulars
+const captcha = result?.ok ? null : await getCaptcha();
 ---
 
 <Layout title="Anmeldung">
@@ -50,6 +55,10 @@ if (Astro.request.method === 'POST' && anlass) {
 
           <label for="bemerkung">Bemerkung</label>
           <textarea id="bemerkung" name="bemerkung" rows="3" maxlength="500"></textarea>
+
+          <label for="captcha">Sicherheitsfrage: Was ist {captcha?.frage}? *</label>
+          <input id="captcha" name="captcha" required inputmode="numeric" maxlength="3" autocomplete="off" />
+          <input type="hidden" name="captcha_token" value={captcha?.token} />
 
           <div class="honeypot" aria-hidden="true">
             <label for="website">Website</label>

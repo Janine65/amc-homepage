@@ -14,12 +14,12 @@
   },
   "dependencies": {
     "@astrojs/node": "^11.1.6",
-    "astro": "^7.3.3"
+    "astro": "^7.3.5"
   },
   "allowScripts": {
     "esbuild": true
   },
   "devDependencies": {
-    "@types/node": "^26.6.2"
+    "@types/node": "^26.6.3"
   }
 }
