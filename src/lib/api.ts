@@ -91,12 +91,14 @@ export interface Captcha {
 export const getCaptcha = () => getJson<Captcha>('/public/captcha');
 
 /** Zählt einen neuen Besucher und liefert den neuen Stand. */
-export async function countBesucher(clientIp?: string): Promise<number | null> {
+export async function countBesucher(clientIp?: string, original?: Request): Promise<number | null> {
   try {
-    const res = await fetch(`${API_URL}/public/besucher`, {
-      method: 'POST',
-      headers: clientIp ? { 'X-Forwarded-For': clientIp } : undefined,
-    });
+    const headers: Record<string, string> = {};
+    if (clientIp) headers['X-Forwarded-For'] = clientIp;
+    const ua = original?.headers.get('user-agent');
+    if (ua) headers['User-Agent'] = ua;
+    if (original?.url) headers['Referer'] = original.url;
+    const res = await fetch(`${API_URL}/public/besucher`, { method: 'POST', headers });
     if (!res.ok) return null;
     const body = (await res.json()) as RetData<number>;
     return body.data;

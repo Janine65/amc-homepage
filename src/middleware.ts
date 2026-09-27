@@ -8,7 +8,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     if (context.cookies.has('amc_besucht')) {
       context.locals.besucher = await getBesucher();
     } else {
-      context.locals.besucher = await countBesucher(context.clientAddress);
+      context.locals.besucher = await countBesucher(context.clientAddress, context.request);
       context.cookies.set('amc_besucht', '1', { path: '/', httpOnly: true, sameSite: 'lax' });
     }
   } else {
