@@ -35,12 +35,17 @@ const current = Astro.url.pathname;
           <img src="/AMCfarbigKlein.jpg" alt="AMC Swissair Wappen" class="logo" />
           AMC Swissair
         </a>
-        <nav>
+        <button class="nav-toggle" aria-label="Menü öffnen" aria-expanded="false" aria-controls="hauptnav">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <nav id="hauptnav">
           {nav.map((item) => (
             <a href={item.href} class:list={{ active: current === item.href }}>{item.label}</a>
           ))}
         </nav>
-        <a href="https://www.facebook.com/amcswissair" target="_blank" rel="noopener noreferrer"><img src="/facebook.png" alt="Facebook" class="social-icon" width="30px"/></a>
+        <a class="facebook" href="https://www.facebook.com/amcswissair" target="_blank" rel="noopener noreferrer"><img src="/facebook.png" alt="Facebook" class="social-icon" width="30px"/></a>
       </div>
     </header>
     <main class="container">
@@ -102,6 +107,43 @@ const current = Astro.url.pathname;
   nav { display: flex; gap: 1rem; }
   nav a { color: var(--text); text-decoration: none; padding: 0.25rem 0; }
   nav a.active, nav a:hover { color: var(--primary); border-bottom: 2px solid var(--primary); }
+  .nav-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+  }
+  .nav-toggle span {
+    display: block;
+    width: 24px;
+    height: 3px;
+    background: var(--primary);
+    border-radius: 2px;
+    transition: transform 0.2s, opacity 0.2s;
+  }
+  .nav-toggle[aria-expanded='true'] span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+  .nav-toggle[aria-expanded='true'] span:nth-child(2) { opacity: 0; }
+  .nav-toggle[aria-expanded='true'] span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+  @media (max-width: 720px) {
+    .nav-toggle { display: flex; order: 2; }
+    header .facebook { order: 3; }
+    nav {
+      display: none;
+      order: 4;
+      flex-basis: 100%;
+      flex-direction: column;
+      gap: 0;
+      padding-bottom: 0.5rem;
+    }
+    nav.open { display: flex; }
+    nav a { padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
+    nav a.active, nav a:hover { border-bottom: 1px solid var(--border); }
+    nav a:last-child { border-bottom: none; }
+  }
   main { padding: 2rem 1rem; min-height: 60vh; }
   footer { border-top: 1px solid var(--border); padding: 1rem 0; color: var(--muted); font-size: 0.9rem; }
   h1 { margin-top: 0; color: var(--primary)}
@@ -149,3 +191,13 @@ const current = Astro.url.pathname;
   }
   .honeypot { position: absolute; left: -9999px; }
 </style>
+
+<script>
+  const toggle = document.querySelector('.nav-toggle');
+  const nav = document.getElementById('hauptnav');
+  toggle?.addEventListener('click', () => {
+    const open = nav?.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', String(!!open));
+    toggle.setAttribute('aria-label', open ? 'Menü schliessen' : 'Menü öffnen');
+  });
+</script>
