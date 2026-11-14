@@ -78,8 +78,13 @@ Danach: `http://localhost:4321`
   Nicht als öffentliche Build-Variable verwenden. Ohne Schlüssel wird
   die detaillierte Erfassung deaktiviert und eine Warnung protokolliert;
   der bestehende Gesamtzähler bleibt erhalten.
-  In Compose unter `amchomepage.environment` eintragen; die Backend-Env-Datei
-  wird nicht automatisch von der Homepage übernommen.
+  Die Compose-Dateien im Verwaltungs-Frontend laden den Schlüssel über
+  `amchomepage.env_file`: `.env.analytics.prod` bzw. `.env.analytics.test`
+  im Ordner der Compose-Datei. Diese privaten Dateien enthalten nur
+  `ANALYTICS_SECRET` und werden nicht versioniert oder ins Image kopiert.
+  Auf der Synology separat bereitstellen. Die Backend-Env-Datei wird nicht
+  automatisch von der Homepage übernommen und sollte wegen der weiteren
+  Zugangsdaten nicht vollständig an sie weitergegeben werden.
 - Für Länder im **Backend** `GEOIP_COUNTRY_DB` setzen und die lokale
   Country-MMDB-Datei einbinden. FreeDNS/DNS liefert keine Länderkennung.
 - Ohne Reverse-Proxy wird die Socket-IP verwendet. Nur wenn die Homepage
