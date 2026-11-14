@@ -41,3 +41,9 @@ All commands are run from the root of the project, from a terminal:
 ## 👀 Want to learn more?
 
 Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+
+## Dependency security checks
+
+Run `pnpm audit` and `pnpm build` after dependency updates. Commit both
+`package.json` and `pnpm-lock.yaml`. Keep Astro and the Node adapter updated
+together: fixes for adapter image endpoints can ship in Astro itself.
