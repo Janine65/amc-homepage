@@ -8,6 +8,8 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "test": "node --test tests/*.test.mjs",
+    "test:ssr": "pnpm build && node --test tests/analytics-ssr.check.mjs",
     "preview": "astro preview",
     "astro": "astro",
     "postversion": "git push && git push --tags"

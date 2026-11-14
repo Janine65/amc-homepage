@@ -1,0 +1,31 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Besuchsstatistik und Datenschutz">
+  <h1>Besuchsstatistik</h1>
+  <div class="card">
+    <p>
+      Zur Verbesserung unserer Homepage erfassen wir sitzungsbezogene Besuchsstatistiken:
+      Land, aufgerufene Seiten, Einstiegsseite, Zugriffsquelle, groben Gerätetyp,
+      Browser sowie Zeitpunkt und näherungsweise Dauer des Besuchs.
+      Wir speichern dafür keine IP-Adressen, vollständigen Browserkennungen,
+      Suchbegriffe, Formularinhalte oder URL-Parameter in den Statistikdaten.
+      Das Land wird, sofern eine lokale GeoIP-Datenbank eingerichtet ist,
+      aus der IP-Adresse ermittelt, ohne sie an einen GeoIP-Dienst zu senden.
+    </p>
+    <p>
+      Das Cookie <code>amc_statistik</code> ordnet Seitenaufrufe einer zufälligen
+      Sitzung zu und läuft nach 30 Minuten ohne erfasste Aktivität ab.
+      Einzelne Besuchsdaten werden nach 365 Tagen gelöscht (täglicher Löschlauf).
+      Die Statistik ist nur für berechtigte Personen in der Vereinsverwaltung zugänglich.
+      Der bisherige Gesamt-Besucherzähler verwendet zusätzlich das Sitzungscookie
+      <code>amc_besucht</code>.
+    </p>
+    <p>
+      Wenn Ihr Browser „Do Not Track“ oder „Global Privacy Control“ sendet,
+      wird keine detaillierte Besuchsstatistik erfasst.
+      Der Gesamtzähler bleibt unabhängig davon bestehen.
+      Bei Fragen können Sie uns über das <a href="/kontakt">Kontaktformular</a> erreichen.
+    </p>
+  </div>
+</Layout>

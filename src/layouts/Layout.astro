@@ -1,5 +1,6 @@
 ---
 import pkg from '../../package.json';
+import VisitorActivity from '../components/VisitorActivity.astro';
 
 interface Props {
   title?: string;
@@ -27,6 +28,7 @@ const current = Astro.url.pathname;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title} – Auto-Moto-Club Swissair</title>
     <meta name="description" content="Auto-Moto-Club Swissair – News, Berichte, Agenda und Meisterschaften" />
+    <VisitorActivity />
   </head>
   <body>
     <header>
@@ -55,6 +57,7 @@ const current = Astro.url.pathname;
       <div class="container">
         © {new Date().getFullYear()} Auto-Moto-Club Swissair · v{pkg.version}
         {besucher !== null && <span class="besucher"> · {besucher.toLocaleString('de-CH')} Besucher</span>}
+        · <a href="/datenschutz">Datenschutz / Besuchsstatistik</a>
       </div>
     </footer>
   </body>

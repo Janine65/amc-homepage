@@ -69,5 +69,47 @@ Danach: `http://localhost:4321`
 
 ## Zusammenspiel
 
+### Besucherstatistik
+
+- Backend zuerst auf Revision `0008_besucher_statistik` migrieren
+  (`alembic upgrade head`); alle drei Anwendungen gemeinsam aktualisieren.
+- `ANALYTICS_SECRET` in der Homepage-Laufzeitumgebung setzen: derselbe
+  zufällige Schlüssel mit mindestens 32 Zeichen wie im Backend.
+  Nicht als öffentliche Build-Variable verwenden. Ohne Schlüssel wird
+  die detaillierte Erfassung deaktiviert und eine Warnung protokolliert;
+  der bestehende Gesamtzähler bleibt erhalten.
+  In Compose unter `amchomepage.environment` eintragen; die Backend-Env-Datei
+  wird nicht automatisch von der Homepage übernommen.
+- Für Länder im **Backend** `GEOIP_COUNTRY_DB` setzen und die lokale
+  Country-MMDB-Datei einbinden. FreeDNS/DNS liefert keine Länderkennung.
+- Ohne Reverse-Proxy wird die Socket-IP verwendet. Nur wenn die Homepage
+  ausschließlich über einen vertrauenswürdigen Proxy erreichbar ist, der
+  `X-Forwarded-For` zuverlässig bereinigt, `ANALYTICS_TRUST_PROXY=true` setzen.
+  Sonst können Länderangaben gefälscht sein. Auch bei Docker/NAT muss geprüft
+  werden, ob die echte Besucher-IP ankommt; interne IPs liefern „Unbekannt“.
+- Bei TLS-Terminierung (z. B. Synology) `ANALYTICS_PUBLIC_ORIGIN` auf die
+  tatsächliche öffentliche Origin setzen, z. B. `https://www.example.org`
+  (ohne Pfad). So werden der Origin-Check für Aktivitätssignale, interne
+  Referrer und Secure-Cookies unabhängig von der internen HTTP-Verbindung
+  korrekt behandelt. Dies aktiviert keine Vertrauensstellung für IP-Header.
+- Sitzungs-Cookie `amc_statistik`: signiert, HttpOnly, SameSite=Lax,
+  30 Minuten Inaktivität; unter HTTPS zusätzlich Secure. Bots/Healthchecks,
+  DNT/GPC, Fehlerseiten, Assets und Formular-POSTs werden nicht detailliert erfasst.
+- Sichtbare Seiten senden alle 15 Sekunden Aktivität und beim
+  Verlassen/Wechsel der Sichtbarkeit ein abschließendes Signal.
+  Browser können solche Signale blockieren oder verwerfen; die Dauer bleibt
+  näherungsweise und misst nicht reine Lesezeit.
+- IP, URL-Parameter, Formularinhalte und vollständige Browserkennungen
+  werden nicht in den Statistikdaten gespeichert. Nur der Referrer-Hostname
+  wird übermittelt, nicht Suchbegriffe oder vollständige URLs.
+- Auswertung in der internen Verwaltung unter **Homepage → Besucherstatistik**;
+  Einzelbesuche werden im Backend nach 365 Tagen durch einen täglichen Lauf gelöscht.
+- Ein Hinweis ist unter `/datenschutz` verlinkt. Er ersetzt keine vollständige
+  Datenschutzerklärung. Erfassung ohne zusätzlichen Einwilligungsdialog,
+  Rechtsgrundlage und Infrastruktur-Logs vor dem produktiven Einsatz prüfen.
+
+Validierung: `pnpm test` (Hilfsfunktionen) und `pnpm test:ssr`
+(Build und temporäre lokale Server mit simuliertem Backend; keine Produktivdaten).
+
 - Backend-Image: [`janine65/amcbackend`](https://hub.docker.com/r/janine65/amcbackend)
 - Interne Verwaltung: [`janine65/amcfrontend`](https://hub.docker.com/r/janine65/amcfrontend)

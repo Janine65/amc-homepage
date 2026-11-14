@@ -1,0 +1,31 @@
+---
+const pageId = Astro.locals.analyticsPage;
+---
+{pageId && <meta name="amc-analytics-page" content={pageId} />}
+<script>
+  const pageId = document.querySelector<HTMLMetaElement>('meta[name="amc-analytics-page"]')?.content;
+  if (pageId && navigator.doNotTrack !== '1') {
+    let stopped = false;
+    const payload = JSON.stringify({ page_id: pageId });
+    const send = async () => {
+      if (stopped) return;
+      try {
+        const response = await fetch('/api/besucher', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: payload, keepalive: true,
+        });
+        if (response.status === 410 || response.status === 403 || response.status === 503) stopped = true;
+        if (!response.ok && response.status !== 410) {
+          console.warn(`Besucheraktivitaet fehlgeschlagen (HTTP ${response.status}).`);
+        }
+      } catch (err) {
+        console.warn('Besucheraktivitaet konnte nicht gesendet werden:', err);
+      }
+    };
+    window.setInterval(() => {
+      if (document.visibilityState === 'visible') void send();
+    }, 15000);
+    document.addEventListener('visibilitychange', () => { void send(); });
+    window.addEventListener('pagehide', () => { void send(); });
+  }
+</script>
