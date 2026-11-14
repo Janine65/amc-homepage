@@ -82,14 +82,6 @@ export const getJahre = () => getJson<JahrFreigabe[]>('/public/jahre');
 /** Aktueller Besucherstand (ohne zu zählen). */
 export const getBesucher = () => getJson<number>('/public/besucher');
 
-export interface Captcha {
-  frage: string;
-  token: string;
-}
-
-/** Rechenaufgabe für die öffentlichen Formulare. */
-export const getCaptcha = () => getJson<Captcha>('/public/captcha');
-
 export async function getTurnstileSiteKey(): Promise<string | null> {
   try {
     const res = await fetch(`${API_URL}/public/turnstile`);
@@ -138,8 +130,7 @@ export async function postAnmeldung(payload: {
   email: string;
   bemerkung?: string;
   website?: string;
-  captcha?: string;
-  captcha_token?: string;
+  turnstile_token: string;
 }): Promise<{ ok: boolean; message: string }> {
   try {
     const res = await fetch(`${API_URL}/public/anmeldung`, {

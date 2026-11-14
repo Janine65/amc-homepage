@@ -1,15 +1,17 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { getAgenda, getCaptcha, postAnmeldung, formatDatum } from '../../lib/api';
+import Turnstile from '../../components/Turnstile.astro';
+import { getAgenda, getTurnstileSiteKey, postAnmeldung, formatDatum } from '../../lib/api';
 
 const { id } = Astro.params;
 const agenda = (await getAgenda()) ?? [];
 const anlass = agenda.find((a) => a.id === Number(id) && !a.istkegeln && !a.istmotorrad);
 
 let result: { ok: boolean; message: string } | null = null;
+let form: FormData | null = null;
 
 if (Astro.request.method === 'POST' && anlass) {
-  const form = await Astro.request.formData();
+  form = await Astro.request.formData();
   result = await postAnmeldung({
     anlassid: anlass.id,
     name: String(form.get('name') ?? ''),
@@ -17,13 +19,11 @@ if (Astro.request.method === 'POST' && anlass) {
     email: String(form.get('email') ?? ''),
     bemerkung: String(form.get('bemerkung') ?? '') || undefined,
     website: String(form.get('website') ?? '') || undefined,
-    captcha: String(form.get('captcha') ?? ''),
-    captcha_token: String(form.get('captcha_token') ?? ''),
+    turnstile_token: String(form.get('cf-turnstile-response') ?? ''),
   });
 }
 
-// Neue Rechenaufgabe für jede (erneute) Anzeige des Formulars
-const captcha = result?.ok ? null : await getCaptcha();
+const siteKey = anlass && !result?.ok ? await getTurnstileSiteKey() : null;
 ---
 
 <Layout title="Anmeldung">
@@ -41,31 +41,30 @@ const captcha = result?.ok ? null : await getCaptcha();
       {anlass.beschreibung && <p>{anlass.beschreibung}</p>}
 
       {result && <div class:list={['alert', result.ok ? 'ok' : 'error']}>{result.message}</div>}
+      {!result?.ok && !siteKey && (
+        <p class="alert error">Der Spam-Schutz ist derzeit nicht verfügbar. Bitte versuche es später erneut.</p>
+      )}
 
-      {!result?.ok && (
+      {!result?.ok && siteKey && (
         <form method="POST" class="card">
           <label for="vorname">Vorname *</label>
-          <input id="vorname" name="vorname" required maxlength="100" />
+          <input id="vorname" name="vorname" required maxlength="100" value={String(form?.get('vorname') ?? '')} />
 
           <label for="name">Nachname *</label>
-          <input id="name" name="name" required maxlength="100" />
+          <input id="name" name="name" required maxlength="100" value={String(form?.get('name') ?? '')} />
 
           <label for="email">E-Mail *</label>
-          <input id="email" name="email" type="email" required maxlength="255" />
+          <input id="email" name="email" type="email" required maxlength="255" value={String(form?.get('email') ?? '')} />
 
           <label for="bemerkung">Bemerkung</label>
-          <textarea id="bemerkung" name="bemerkung" rows="3" maxlength="500"></textarea>
-
-          <label for="captcha">Sicherheitsfrage: Was ist {captcha?.frage}? *</label>
-          <input id="captcha" name="captcha" required inputmode="numeric" maxlength="3" autocomplete="off" />
-          <input type="hidden" name="captcha_token" value={captcha?.token} />
+          <textarea id="bemerkung" name="bemerkung" rows="3" maxlength="500">{String(form?.get('bemerkung') ?? '')}</textarea>
 
           <div class="honeypot" aria-hidden="true">
             <label for="website">Website</label>
             <input id="website" name="website" tabindex="-1" autocomplete="off" />
           </div>
 
-          <p><button class="btn" type="submit">Anmelden</button></p>
+          <Turnstile siteKey={siteKey} action="anmeldung" submitLabel="Anmelden" />
         </form>
       )}
       {result?.ok && <a class="btn" href="/agenda">Zur Agenda</a>}

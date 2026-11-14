@@ -1,0 +1,54 @@
+---
+interface Props {
+  siteKey: string;
+  action: 'kontakt' | 'anmeldung';
+  submitLabel: string;
+}
+
+const { siteKey, action, submitLabel } = Astro.props;
+---
+
+<p class="hinweis">
+  Zum Schutz vor Spam verwenden wir Cloudflare Turnstile. Dabei werden technische
+  Verbindungs- und Browserdaten durch Cloudflare verarbeitet, gegebenenfalls auch
+  ausserhalb der Schweiz und des EWR.
+  Weitere Informationen findest du in der
+  <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer">Datenschutzerklärung von Cloudflare</a>.
+</p>
+<div
+  class="cf-turnstile"
+  data-sitekey={siteKey}
+  data-action={action}
+  data-language="de"
+  data-size="flexible"
+  data-callback="formTurnstileSuccess"
+  data-expired-callback="formTurnstileExpired"
+  data-error-callback="formTurnstileError"
+  data-timeout-callback="formTurnstileExpired"
+></div>
+<p id="turnstile-status" role="status" aria-live="polite">Sicherheitsprüfung wird geladen …</p>
+<noscript><p class="alert error">Bitte aktiviere JavaScript, um die Sicherheitsprüfung abzuschliessen.</p></noscript>
+<p><button id="turnstile-submit" class="btn" type="submit" disabled>{submitLabel}</button></p>
+
+<script is:inline>
+  function setFormTurnstileState(ready, message) {
+    document.getElementById('turnstile-submit').disabled = !ready;
+    document.getElementById('turnstile-status').textContent = message;
+  }
+  window.formTurnstileSuccess = function () {
+    setFormTurnstileState(true, 'Sicherheitsprüfung abgeschlossen.');
+  };
+  window.formTurnstileExpired = function () {
+    setFormTurnstileState(false, 'Sicherheitsprüfung abgelaufen. Bitte erneut abschliessen.');
+  };
+  window.formTurnstileError = function () {
+    setFormTurnstileState(false, 'Sicherheitsprüfung nicht verfügbar. Bitte prüfe deine Verbindung oder lade die Seite erneut.');
+  };
+</script>
+<script
+  is:inline
+  src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+  async
+  defer
+  onerror="window.formTurnstileError()"
+></script>

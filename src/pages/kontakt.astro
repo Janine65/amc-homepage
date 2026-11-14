@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Turnstile from '../components/Turnstile.astro';
 import { getTurnstileSiteKey, postKontakt } from '../lib/api';
 
 let result: { ok: boolean; message: string } | null = null;
@@ -47,60 +48,13 @@ const siteKey = result?.ok ? null : await getTurnstileSiteKey();
       <label for="nachricht">Nachricht *</label>
       <textarea id="nachricht" name="nachricht" rows="6" required maxlength="5000">{String(form?.get('nachricht') ?? '')}</textarea>
 
-      <p class="hinweis">
-        Zum Schutz vor Spam verwenden wir Cloudflare Turnstile. Dabei werden technische
-        Verbindungs- und Browserdaten durch Cloudflare verarbeitet, gegebenenfalls auch
-        ausserhalb der Schweiz und des EWR.
-        Weitere Informationen findest du in der
-        <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer">Datenschutzerklärung von Cloudflare</a>.
-      </p>
-      <div
-        class="cf-turnstile"
-        data-sitekey={siteKey}
-        data-action="kontakt"
-        data-language="de"
-        data-size="flexible"
-        data-callback="contactTurnstileSuccess"
-        data-expired-callback="contactTurnstileExpired"
-        data-error-callback="contactTurnstileError"
-        data-timeout-callback="contactTurnstileExpired"
-      ></div>
-      <p id="turnstile-status" role="status" aria-live="polite">Sicherheitsprüfung wird geladen …</p>
-      <noscript><p class="alert error">Bitte aktiviere JavaScript, um die Sicherheitsprüfung abzuschliessen.</p></noscript>
-
       <div class="honeypot" aria-hidden="true">
         <label for="website">Website</label>
         <input id="website" name="website" tabindex="-1" autocomplete="off" />
       </div>
 
-      <p><button id="kontakt-submit" class="btn" type="submit" disabled>Senden</button></p>
+      <Turnstile siteKey={siteKey} action="kontakt" submitLabel="Senden" />
     </form>
   )}
   {result?.ok && <a class="btn" href="/">Zur Übersicht</a>}
-  {!result?.ok && siteKey && (
-    <>
-      <script is:inline>
-        function setContactTurnstileState(ready, message) {
-          document.getElementById('kontakt-submit').disabled = !ready;
-          document.getElementById('turnstile-status').textContent = message;
-        }
-        window.contactTurnstileSuccess = function () {
-          setContactTurnstileState(true, 'Sicherheitsprüfung abgeschlossen.');
-        };
-        window.contactTurnstileExpired = function () {
-          setContactTurnstileState(false, 'Sicherheitsprüfung abgelaufen. Bitte erneut abschliessen.');
-        };
-        window.contactTurnstileError = function () {
-          setContactTurnstileState(false, 'Sicherheitsprüfung nicht verfügbar. Bitte prüfe deine Verbindung oder lade die Seite erneut.');
-        };
-      </script>
-      <script
-        is:inline
-        src="https://challenges.cloudflare.com/turnstile/v0/api.js"
-        async
-        defer
-        onerror="window.contactTurnstileError()"
-      ></script>
-    </>
-  )}
 </Layout>
