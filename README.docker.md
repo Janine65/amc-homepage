@@ -50,6 +50,20 @@ Danach: `http://localhost:4321`
 - Alle Backend-Aufrufe laufen Server-zu-Server (SSR) — keine CORS-Konfiguration nötig, das Backend muss nicht öffentlich erreichbar sein.
 - Meisterschafts-Ranglisten werden nur für Jahre angezeigt, die intern freigegeben wurden (`jahr_freigabe`).
 - Anmeldungen werden mit Honeypot und Backend-Rate-Limit gegen Spam geschützt.
+- Das Kontaktformular verwendet Cloudflare Turnstile statt der Rechenaufgabe,
+  zusätzlich zu Honeypot und Backend-Rate-Limit. Beide Schlüssel werden nur im
+  Backend als `CLOUDFLARE_TURNSPIKE_SITEKEY` und `CLOUDFLARE_TURNSPIKE_SECRET`
+  gesetzt (bestehende Schreibweise). Die Homepage lädt ausschliesslich den
+  öffentlichen Site Key über `GET /public/turnstile`. Ohne Konfiguration oder bei
+  fehlgeschlagener Prüfung ist kein Versand möglich.
+- Backend und Homepage gemeinsam aktualisieren und die Homepage-Hostnamen im
+  Cloudflare-Widget freigeben. Für lokale Tests muss auch der lokale Hostname
+  erlaubt sein. Der Browser muss `https://challenges.cloudflare.com` als
+  Script-/Frame-Quelle erreichen können; gegebenenfalls die CSP des
+  Reverse-Proxys entsprechend anpassen.
+- Das Kontaktformular zeigt einen Datenschutzhinweis zu Cloudflare; eine
+  allenfalls separat veröffentlichte Datenschutzerklärung muss ebenfalls
+  entsprechend ergänzt werden.
 
 ## Zusammenspiel
 

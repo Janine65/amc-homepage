@@ -90,6 +90,25 @@ export interface Captcha {
 /** Rechenaufgabe für die öffentlichen Formulare. */
 export const getCaptcha = () => getJson<Captcha>('/public/captcha');
 
+export async function getTurnstileSiteKey(): Promise<string | null> {
+  try {
+    const res = await fetch(`${API_URL}/public/turnstile`);
+    if (!res.ok) {
+      console.error(`Turnstile-Konfiguration nicht verfügbar (HTTP ${res.status}).`);
+      return null;
+    }
+    const body: RetData<{ site_key: string }> = await res.json();
+    if (!body.data?.site_key) {
+      console.error('Turnstile-Konfiguration enthält keinen Site Key.');
+      return null;
+    }
+    return body.data.site_key;
+  } catch (err) {
+    console.error('Turnstile-Konfiguration konnte nicht geladen werden:', err);
+    return null;
+  }
+}
+
 /** Zählt einen neuen Besucher und liefert den neuen Stand. */
 export async function countBesucher(clientIp?: string, original?: Request): Promise<number | null> {
   try {
@@ -143,8 +162,7 @@ export async function postKontakt(payload: {
   betreff: string;
   nachricht: string;
   website?: string;
-  captcha?: string;
-  captcha_token?: string;
+  turnstile_token: string;
 }): Promise<{ ok: boolean; message: string }> {
   try {
     const res = await fetch(`${API_URL}/public/kontakt`, {
